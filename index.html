@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screen Saver</title>
+    <title>Simple Screen Saver</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
         body {
@@ -22,22 +22,40 @@
         .container {
             text-align: center;
             background-color: rgba(0, 0, 0, 0.5); /* Dark shaded background */
-            border-radius: 75px; /* More rounded corners */
-            padding: 50px;
+            border-radius: 30px; /* More rounded corners */
+            padding: 20px;
         }
         .clock {
             font-size: 5em;
         }
-        .date {
-            font-size: 1.5em;
-            margin-top: 0px;
+        .fullscreen-btn, .upload-btn {
+            position: absolute;
+            top: 20px;
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 20px; /* Set border radius to 20px */
+        }
+        .fullscreen-btn {
+            right: 20px;
+        }
+        .upload-btn {
+            left: 20px;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
+    <button class="fullscreen-btn" id="fullscreen-btn" onclick="toggleFullScreen()">Go Fullscreen</button>
+    <button class="upload-btn" id="upload-btn" onclick="document.getElementById('file-input').click()">Upload Image</button>
+    <input type="file" id="file-input" class="hidden" accept="image/*" onchange="changeBackground(event)">
     <div class="container">
         <div class="clock" id="clock"></div>
-        <div class="date" id="date"></div>
     </div>
     <script>
         function updateTime() {
@@ -48,11 +66,41 @@
             const displayHours = hours % 12 || 12;
 
             document.getElementById('clock').textContent = `${displayHours}:${minutes} ${ampm}`;
-            document.getElementById('date').textContent = now.toLocaleDateString();
 
             // Prevent device from sleeping
             if ('wakeLock' in navigator) {
                 navigator.wakeLock.request('screen').catch(err => console.error(err));
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    document.getElementById('fullscreen-btn').style.display = 'none';
+                    document.getElementById('upload-btn').style.display = 'none';
+                }).catch((err) => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().then(() => {
+                        document.getElementById('fullscreen-btn').style.display = 'block';
+                        document.getElementById('upload-btn').style.display = 'block';
+                    }).catch((err) => {
+                        console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+                    });
+                }
+            }
+        }
+
+        function changeBackground(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.body.style.backgroundImage = `url(${e.target.result})`;
+            };
+            if (file) {
+                reader.readAsDataURL(file);
             }
         }
 
