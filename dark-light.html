@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Background Clock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
+    <style>
+        body {
+            cursor: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('image-light.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
+            transition: background 0.3s ease-in-out;
+        }
+
+        .clock {
+            text-align: center;
+            font-size: 12rem;
+            font-weight: 100;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .ampm {
+            font-size: 4rem;
+        }
+
+        .fullscreen-btn, .toggle-dark-btn {
+            position: absolute;
+            top: 10px;
+            padding: 10px 20px;
+            background-color: grey;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .fullscreen-btn {
+            right: 10px;
+        }
+
+        .toggle-dark-btn {
+            left: 10px;
+        }
+
+        .fullscreen-btn:hover, .toggle-dark-btn:hover {
+            background-color: #0d47a1;
+        }
+
+        .dark-mode .fullscreen-btn, .dark-mode .toggle-dark-btn {
+            background-color: grey;
+        }
+
+        .dark-mode .fullscreen-btn:hover, .dark-mode .toggle-dark-btn:hover {
+            background-color: #003366;
+        }
+    </style>
+</head>
+<body>
+    <div class="clock" id="clock"></div>
+    <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()">Go Fullscreen</button>
+    <button class="toggle-dark-btn" id="toggleDarkBtn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    
+    <script>
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes} <span class="ampm">${ampm}</span>`;
+
+            document.getElementById('clock').innerHTML = timeString;
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                document.body.style.backgroundImage = "url('image-dark.jpg')";
+            } else {
+                document.body.style.backgroundImage = "url('image-light.jpg')";
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            fullscreenBtn.style.display = document.fullscreenElement ? 'none' : 'block';
+        });
+
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
