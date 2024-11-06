@@ -4,108 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Background Clock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
         body {
+            cursor: none;
             margin: 0;
-            height: 100vh;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Roboto', sans-serif;
+            height: 100vh;
             background: url('image.jpg') no-repeat center center fixed;
             background-size: cover;
-            color: white;
-            text-align: center;
-            cursor: none; /* Hide cursor */
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
         }
-        .container {
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.5); /* Dark shaded background */
-            border-radius: 30px; /* More rounded corners */
-            padding: 20px;
-        }
+
         .clock {
-            font-size: 5em;
+            text-align: center;
+            font-size: 12rem;
+            font-weight: 100;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
+
+        .ampm {
+            font-size: 4rem;
+        }
+
         .fullscreen-btn, .upload-btn {
             position: absolute;
-            top: 20px;
+            top: 10px;
             padding: 10px 20px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border: none;
+            background-color: grey;
             color: white;
-            font-size: 1em;
+            border: none;
             cursor: pointer;
-            border-radius: 20px; /* Set border radius to 20px */
+            border-radius: 5px;
+            font-family: 'Roboto', sans-serif;
         }
+
         .fullscreen-btn {
-            right: 20px;
+            right: 10px;
         }
+
         .upload-btn {
-            left: 20px;
+            left: 10px;
         }
-        .hidden {
+
+        .fullscreen-btn:hover, .upload-btn:hover {
+            background-color: #0d47a1;
+        }
+
+        .dark-mode .fullscreen-btn, .dark-mode .upload-btn {
+            background-color: #4a90e2;
+        }
+
+        .dark-mode .fullscreen-btn:hover, .dark-mode .upload-btn:hover {
+            background-color: #003366;
+        }
+
+        .upload-input {
             display: none;
         }
     </style>
 </head>
 <body>
-    <button class="fullscreen-btn" id="fullscreen-btn" onclick="toggleFullScreen()">Go Fullscreen</button>
-    <button class="upload-btn" id="upload-btn" onclick="document.getElementById('file-input').click()">Upload Image</button>
-    <input type="file" id="file-input" class="hidden" accept="image/*" onchange="changeBackground(event)">
-    <div class="container">
-        <div class="clock" id="clock"></div>
-    </div>
+    <div class="clock" id="clock"></div>
+    <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()">Go Fullscreen</button>
+    <button class="upload-btn" id="uploadBtn" onclick="document.getElementById('uploadInput').click()">Upload Background</button>
+    <input type="file" id="uploadInput" class="upload-input" accept="image/*" onchange="changeBackground(event)">
+    
     <script>
-        function updateTime() {
+        function updateClock() {
             const now = new Date();
-            const hours = now.getHours();
+            let hours = now.getHours();
             const minutes = now.getMinutes().toString().padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
-            const displayHours = hours % 12 || 12;
 
-            document.getElementById('clock').textContent = `${displayHours}:${minutes} ${ampm}`;
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes} <span class="ampm">${ampm}</span>`;
 
-            // Prevent device from sleeping
-            if ('wakeLock' in navigator) {
-                navigator.wakeLock.request('screen').catch(err => console.error(err));
-            }
+            document.getElementById('clock').innerHTML = timeString;
         }
 
-        function toggleFullScreen() {
+        function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().then(() => {
-                    document.getElementById('fullscreen-btn').style.display = 'none';
-                    document.getElementById('upload-btn').style.display = 'none';
-                }).catch((err) => {
-                    console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                });
+                document.documentElement.requestFullscreen();
             } else {
                 if (document.exitFullscreen) {
-                    document.exitFullscreen().then(() => {
-                        document.getElementById('fullscreen-btn').style.display = 'block';
-                        document.getElementById('upload-btn').style.display = 'block';
-                    }).catch((err) => {
-                        console.error(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
-                    });
+                    document.exitFullscreen();
                 }
             }
         }
 
         function changeBackground(event) {
-            const file = event.target.files[0];
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.body.style.backgroundImage = `url(${e.target.result})`;
             };
-            if (file) {
-                reader.readAsDataURL(file);
-            }
+            reader.readAsDataURL(event.target.files[0]);
         }
 
-        setInterval(updateTime, 1000);
-        updateTime();
+        document.addEventListener('fullscreenchange', () => {
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            fullscreenBtn.style.display = document.fullscreenElement ? 'none' : 'block';
+        });
+
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
 </body>
 </html>
